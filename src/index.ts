@@ -55,13 +55,13 @@ class Product {
 }
   
 class Bill {
-  private saleId: number;
+  private billId: number;
   private products: Product[] = [];
   private quantities: number[] = [];
   private static counter = 0;
 
   constructor() {
-    this.saleId = ++Bill.counter;
+    this.billId = ++Bill.counter;
   }
 
   public addProduct(product: Product, quantity: number): void {
@@ -90,8 +90,8 @@ class Bill {
     return this.quantities;
   }
 
-  public getSaleId(): number {
-    return this.saleId;
+  public getbillId(): number {
+    return this.billId;
   }
 }
 
@@ -112,3 +112,69 @@ class BillGenerator {
     console.log("========");
   }
 }
+
+class Customer{
+  private customerId:number;
+  private name: string;
+  private address: string;
+  private phone: string;
+  private bills: Bill[]=[];
+  private lifeTimeValue: number=0;
+  private static count: number=0;
+
+  constructor(name: string, address: string, phone: string){
+    this.name=name;
+    this.address=address;
+    this.phone=phone;
+    this.customerId=++Customer.count;
+  }
+
+  public getCustomerId(): number{
+    return this.customerId;
+  }
+  public getName():string{
+    return this.name;
+  }
+
+  public getAddress():string{
+    return this.address;
+  }
+
+  public getPhone():string{
+    return this.phone;
+  }
+
+  public getLifeTimeValue():number{
+    return this.lifeTimeValue;
+  }
+
+  public getBills(): Bill[]{
+    return this.bills;
+  }
+
+  public setName(name: string): void{
+    this.name=name;
+  }
+
+  public setAddress(address: string): void{
+    this.address=address;
+  }
+
+  public setPhone(phone: string): void{
+    this.phone=phone;
+  }
+
+  public setLifeTimeValue(value:number):void{
+    this.lifeTimeValue=value;
+  }
+
+  public addLifeTimeValue(value: number): void{
+    this.lifeTimeValue+=value;
+  }
+
+  public addBill(bill:Bill): void{
+    this.bills.push(bill);
+  }
+  
+}
+
