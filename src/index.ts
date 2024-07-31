@@ -53,15 +53,15 @@ class Product {
       this.quantity += quantityIncreased;
     }
 }
-  
+
 class Bill {
-  private billId: number;
+  private saleId: number;
   private products: Product[] = [];
   private quantities: number[] = [];
   private static counter = 0;
 
   constructor() {
-    this.billId = ++Bill.counter;
+    this.saleId = ++Bill.counter;
   }
 
   public addProduct(product: Product, quantity: number): void {
@@ -90,8 +90,8 @@ class Bill {
     return this.quantities;
   }
 
-  public getbillId(): number {
-    return this.billId;
+  public getSaleId(): number {
+    return this.saleId;
   }
 }
 

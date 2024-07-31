@@ -87,3 +87,50 @@ class BillGenerator {
         console.log("========");
     }
 }
+class Customer {
+    constructor(name, address, phone) {
+        this.bills = [];
+        this.lifeTimeValue = 0;
+        this.name = name;
+        this.address = address;
+        this.phone = phone;
+        this.customerId = ++Customer.count;
+    }
+    getCustomerId() {
+        return this.customerId;
+    }
+    getName() {
+        return this.name;
+    }
+    getAddress() {
+        return this.address;
+    }
+    getPhone() {
+        return this.phone;
+    }
+    getLifeTimeValue() {
+        return this.lifeTimeValue;
+    }
+    getBills() {
+        return this.bills;
+    }
+    setName(name) {
+        this.name = name;
+    }
+    setAddress(address) {
+        this.address = address;
+    }
+    setPhone(phone) {
+        this.phone = phone;
+    }
+    setLifeTimeValue(value) {
+        this.lifeTimeValue = value;
+    }
+    addLifeTimeValue(value) {
+        this.lifeTimeValue += value;
+    }
+    addBill(bill) {
+        this.bills.push(bill);
+    }
+}
+Customer.count = 0;
