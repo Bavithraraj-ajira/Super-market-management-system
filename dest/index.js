@@ -1,22 +1,36 @@
 "use strict";
 class Inventory {
     constructor(inventoryName) {
-        this.products = [];
+        this.products = new Map();
         this.inventoryName = inventoryName;
         this.inventoryId = ++Inventory.counter;
     }
-    addProduct(product) {
-        this.products.push(product);
+    addProduct(product, quantity) {
+        this.products.set(product.getProductId(), { product, quantity });
+    }
+    getProductQuantity(productId) {
+        return this.products.has(productId) ? this.products.get(productId).quantity : 0;
+    }
+    updateProductQuantity(productId, quantity) {
+        if (this.products.has(productId)) {
+            let productInfo = this.products.get(productId);
+            productInfo.quantity -= quantity;
+            this.products.set(productId, productInfo);
+        }
+        else {
+            console.log("Product ID not found");
+        }
+    }
+    getProduct(productId) {
+        return this.products.has(productId) ? this.products.get(productId).product : undefined;
     }
 }
 Inventory.counter = 0;
 class Product {
-    constructor(productId, productName, quantity, pricePerQuantity) {
-        this.productId = productId;
+    constructor(productName, pricePerQuantity) {
+        this.productId = ++Product.counter;
         this.productName = productName;
-        this.quantity = quantity;
         this.pricePerQuantity = pricePerQuantity;
-        Product.counter++;
     }
     getProductId() {
         return this.productId;
@@ -27,66 +41,66 @@ class Product {
     getPricePerQuantity() {
         return this.pricePerQuantity;
     }
-    getQuantity() {
-        return this.quantity;
-    }
-    deduceQuantity(quantityDeduced) {
-        this.quantity -= quantityDeduced;
-    }
-    increaseQuantity(quantityIncreased) {
-        this.quantity += quantityIncreased;
-    }
 }
 Product.counter = 0;
-class Bill {
-    constructor() {
-        this.products = [];
-        this.quantities = [];
-        this.saleId = ++Bill.counter;
+class BillItems {
+    constructor(inventory) {
+        this.items = new Map();
+        this.inventory = inventory;
     }
     addProduct(product, quantity) {
-        if (product && product.getQuantity() >= quantity) {
-            this.products.push(product);
-            this.quantities.push(quantity);
-            product.deduceQuantity(quantity);
+        const availableQuantity = this.inventory.getProductQuantity(product.getProductId());
+        if (availableQuantity >= quantity) {
+            if (this.items.has(product)) {
+                this.items.set(product, this.items.get(product) + quantity);
+            }
+            else {
+                this.items.set(product, quantity);
+            }
+            this.inventory.updateProductQuantity(product.getProductId(), -quantity);
         }
         else {
-            console.log(`Product ID ${product.getProductId()} is out of stock or does not have enough quantity.`);
+            console.log(`Product ID ${product.getProductId()} is out of stock or does not have enough quantity. Available quantity: ${availableQuantity}`);
         }
+    }
+    getItems() {
+        return this.items;
     }
     calculateTotal() {
         let total = 0;
-        this.products.forEach((product, index) => {
-            total += product.getPricePerQuantity() * this.quantities[index];
+        this.items.forEach((quantity, product) => {
+            total += product.getPricePerQuantity() * quantity;
         });
         return total;
     }
-    getProducts() {
-        return this.products;
-    }
-    getQuantities() {
-        return this.quantities;
-    }
-    getSaleId() {
-        return this.saleId;
-    }
 }
-Bill.counter = 0;
-class BillGenerator {
-    static generateBill(bill) {
+class Bill {
+    constructor(billItems) {
+        this.saleId = ++Bill.counter;
+        this.billItems = billItems;
+    }
+    calculateTotal() {
+        return this.billItems.calculateTotal();
+    }
+    generateBill() {
         console.log("== Bill ==");
-        const products = bill.getProducts();
-        const quantities = bill.getQuantities();
-        products.forEach((product, index) => {
-            const totalPrice = product.getPricePerQuantity() * quantities[index];
-            console.log(`${product.getProductId()} - ${product.getProductName()} - ${quantities[index]} - ${product.getPricePerQuantity()} - N/A - ${totalPrice}`);
+        this.billItems.getItems().forEach((quantity, product) => {
+            const totalPrice = product.getPricePerQuantity() * quantity;
+            console.log(`${product.getProductId()} - ${product.getProductName()} - ${quantity} - ${product.getPricePerQuantity()} - ${totalPrice}`);
         });
-        const totalAmount = bill.calculateTotal();
+        const totalAmount = this.calculateTotal();
         console.log("== Total ==");
         console.log(totalAmount);
         console.log("========");
     }
+    getSaleId() {
+        return this.saleId;
+    }
+    getBillItems() {
+        return this.billItems;
+    }
 }
+Bill.counter = 0;
 class Customer {
     constructor(name, address, phone) {
         this.bills = [];

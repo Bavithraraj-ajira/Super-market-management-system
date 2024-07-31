@@ -20,7 +20,7 @@ class Inventory {
   public updateProductQuantity(productId: number, quantity: number): void {
     if (this.products.has(productId)) {
       let productInfo = this.products.get(productId)!;
-      productInfo.quantity += quantity; // Adjust the quantity
+      productInfo.quantity -= quantity; 
       this.products.set(productId, productInfo);
     } else {
       console.log("Product ID not found");
@@ -126,5 +126,70 @@ class Bill {
 
   public getBillItems(): BillItems {
     return this.billItems;
+  }
+}
+
+class Customer {
+  private static count: number = 0;
+  private customerId: number;
+  private name: string;
+  private address: string;
+  private phone: string;
+  private bills: Bill[] = [];
+  private lifeTimeValue: number = 0;
+
+  constructor(name: string, address: string, phone: string) {
+    this.name = name;
+    this.address = address;
+    this.phone = phone;
+    this.customerId = ++Customer.count;
+  }
+
+  public getCustomerId(): number {
+    return this.customerId;
+  }
+
+  public getName(): string {
+    return this.name;
+  }
+
+  public getAddress(): string {
+    return this.address;
+  }
+
+  public getPhone(): string {
+    return this.phone;
+  }
+
+  public getLifeTimeValue(): number {
+    return this.lifeTimeValue;
+  }
+
+  public getBills(): any[] {
+    return this.bills;
+  }
+
+  public setName(name: string): void {
+    this.name = name;
+  }
+
+  public setAddress(address: string): void {
+    this.address = address;
+  }
+
+  public setPhone(phone: string): void {
+    this.phone = phone;
+  }
+
+  public setLifeTimeValue(value: number): void {
+    this.lifeTimeValue = value;
+  }
+
+  public addLifeTimeValue(value: number): void {
+    this.lifeTimeValue += value;
+  }
+
+  public addBill(bill: any): void {
+    this.bills.push(bill);
   }
 }
