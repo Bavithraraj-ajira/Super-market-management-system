@@ -1,3 +1,5 @@
+import promptSync from 'prompt-sync'
+
 class Inventory {
   private inventoryId: number;
   private inventoryName: string;
@@ -29,6 +31,10 @@ class Inventory {
 
   public getProduct(productId: number): Product | undefined {
     return this.products.has(productId) ? this.products.get(productId)!.product : undefined;
+  }
+
+  public getInventoryId(): number{
+    return this.inventoryId;
   }
 }
 
@@ -95,11 +101,13 @@ class BillItems {
 class Bill {
   private saleId: number;
   private billItems: BillItems;
+  private customer: Customer;
   private static counter = 0;
 
-  constructor(billItems: BillItems) {
+  constructor(billItems: BillItems, customer: Customer) {
     this.saleId = ++Bill.counter;
     this.billItems = billItems;
+    this.customer = customer;
   }
 
   public calculateTotal(): number {
@@ -108,6 +116,7 @@ class Bill {
 
   public generateBill(): void {
     console.log("== Bill ==");
+    console.log(`Customer: ${this.customer.getName()} - ${this.customer.getPhone()}`);
     this.billItems.getItems().forEach((quantity, product) => {
       const totalPrice = product.getPricePerQuantity() * quantity;
       console.log(
@@ -127,6 +136,10 @@ class Bill {
   public getBillItems(): BillItems {
     return this.billItems;
   }
+
+  public getCustomer(): Customer {
+    return this.customer;
+  }
 }
 
 class Customer {
@@ -138,7 +151,7 @@ class Customer {
   private bills: Bill[] = [];
   private lifeTimeValue: number = 0;
 
-  constructor(name: string, address: string, phone: string) {
+  constructor(name: string, phone: string,address: string) {
     this.name = name;
     this.address = address;
     this.phone = phone;
@@ -192,4 +205,95 @@ class Customer {
   public addBill(bill: any): void {
     this.bills.push(bill);
   }
+}
+
+
+function main(){
+  const promt = promptSync();
+  let customers:Customer[]=[];
+  let inventories: Inventory[] = [];
+  let inventory: Inventory | undefined;
+  let inventoryId: number;
+  while(true){
+      console.log("1. Add Customer");
+      console.log("2. Add Inventory");
+      console.log("3. Add Product");
+      console.log("4. Create a Bill");
+      console.log("5. Exit");
+      const input = promt("Enter an option");
+      switch(input){
+        case "1":
+          let customer = new Customer(promt("Enter Customer Name:"), promt("Enter phone:"),promt("Enter Address:"));
+          customers.push(customer);
+          break;
+        
+        case "2":
+          let newInventory = new Inventory(promt("Enter Inventory Name"));
+          inventories.push(newInventory);
+          break;
+
+        case "3":
+          let product = new Product(promt("Enter Product Name"), parseInt(promt("Enter Product Price")));
+          let inventoryId1 = parseInt(promt("Enter Inventory ID"));
+          inventory = findInventory(inventoryId1,inventories);
+          if (inventory) {
+            let quantity = parseInt(promt("Enter Quantity"));
+            inventory.addProduct(product, quantity);
+          } else {
+            console.log("Inventory ID does not match");
+          }
+          break;
+
+        case "4":
+          let inventoryId = parseInt(promt("Enter Inventory ID"));
+          inventory = findInventory(inventoryId, inventories);
+          if (inventory) {
+            let billItem = new BillItems(inventory);
+            while (true) {
+              let productId = parseInt(promt("Enter Product ID (or 0 to finish):"));
+              if (productId === 0) {
+                break;
+              }
+              let product = inventory.getProduct(productId);
+              if (product) {
+                let availableQuantity = inventory.getProductQuantity(productId);
+                console.log(`Available quantity: ${availableQuantity}`);
+                let quantity = parseInt(promt("Enter Quantity"));
+                if (quantity <= availableQuantity) {
+                  billItem.addProduct(product, quantity);
+                } else {
+                  console.log("Not enough quantity available");
+                }
+              } else {
+                console.log("Product not found");
+              }
+            }
+            let customerId = parseInt(promt("Enter Customer ID"));
+            let customer = customers.find(c => c.getCustomerId() === customerId);
+            if (customer) {
+              let bill = new Bill(billItem, customer);
+              bill.generateBill();
+              customer.addBill(bill);
+              customer.addLifeTimeValue(bill.calculateTotal());
+            } else {
+              console.log("Customer not found");
+            }
+          } else {
+            console.log("Inventory ID does not match");
+          }
+          break;
+
+        case "5":
+          console.log("Good Bye...");
+          break;
+        
+        default:
+          console.log("Invalid option");
+
+      }
+  }
+}
+
+function findInventory(inverntoryId: number,inventories: Inventory[]):Inventory | undefined {
+  return inventories.find(i => i.getInventoryId() === inverntoryId);
 }
